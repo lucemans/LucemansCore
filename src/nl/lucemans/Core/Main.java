@@ -3,10 +3,14 @@ package nl.lucemans.Core;
 import java.lang.reflect.Field;
 import java.security.acl.Permission;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Set;
 
+import org.apache.logging.log4j.Level;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Particle;
+import org.bukkit.Server;
 import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -14,19 +18,30 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryInteractEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.permissions.PermissionAttachment;
+import org.bukkit.permissions.PermissionAttachmentInfo;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
+import nl.lucemans.Core.inv.LInventory;
+import nl.lucemans.Core.inv.LInventoryItem;
+import nl.lucemans.Core.item.Item;
 import nl.lucemans.Core.item.ItemManager;
 import nl.lucemans.Core.race.Human;
 import nl.lucemans.Core.race.Race;
 import nl.lucemans.Core.role.Role;
+import nl.lucemans.Core.settings.InventorySaver;
 import nl.lucemans.Core.settings.SettingsManager;
 import nl.lucemans.Core.skin.SkinChange;
 import nl.lucemans.Core.skin.SkinManipulator;
@@ -55,9 +70,11 @@ public class Main extends JavaPlugin implements Listener{
 	
 	public boolean usesAnimations = false;
 	public boolean usesClans = false;
+	public boolean usesVault = false;
 	
 	public SkinManipulator skinman;
 	public SettingsManager setman;
+	public InventorySaver invsaver;
 	public ItemManager itemman;
 	public NovaAnimations animan;
 	public NovaClans clanman;
@@ -67,6 +84,10 @@ public class Main extends JavaPlugin implements Listener{
     public Chat chat = null;
     
     public ArrayList<DelayedTP> dtps = new ArrayList<DelayedTP>();
+    public HashMap<String, LInventory> linvs = new HashMap<String, LInventory>();
+    
+    /*** FUN ***/
+    public Inventory inventory;
 
 	@Override
 	public void onEnable() {
@@ -105,7 +126,9 @@ public class Main extends JavaPlugin implements Listener{
 		
 		getLogger().info(core.parse("Loading lang files"));
 		setman = new SettingsManager();
+		invsaver = new InventorySaver();
 		setman.init(this);
+		invsaver.init(this);
 		
 		skinman = new SkinManipulator();
 		
@@ -113,6 +136,7 @@ public class Main extends JavaPlugin implements Listener{
 		
 		/** Check SOFTDEPENCIES */
 		// Skins
+		if (Bukkit.getPluginManager().isPluginEnabled("SkinsRestorer"))
 		if (Bukkit.getPluginManager().isPluginEnabled(SkinsRestorer.getInstance()))
 			usesSkins = true;
 		
@@ -121,10 +145,15 @@ public class Main extends JavaPlugin implements Listener{
 		else
 			getLogger().info("THIS SERVER DOES NOT USE SKINS!!!");
 		
+		inventory = Bukkit.createInventory(null, 9*6, core.parse("&7Global EnderChest"));
+		invsaver.loadInventory("lucemans.global", inventory);
+		
 		// Vault
+		try{
 		setupEconomy();
 		setupChat();
 		setupPermissions();
+		}catch(Exception e){e.printStackTrace();};
 		
 		/** Register Events */
 		Bukkit.getPluginManager().registerEvents(this, this);
@@ -134,7 +163,6 @@ public class Main extends JavaPlugin implements Listener{
 			
 			@Override
 			public void run() {
-				// TODO Auto-generated method stub
 				onTick();
 			}
 		}, 1, 1);
@@ -148,6 +176,7 @@ public class Main extends JavaPlugin implements Listener{
 	@Override
 	public void onDisable() {
 		getLogger().info("Saving Files");
+		invsaver.saveInventory(inventory, "lucemans.global");
 		try{
 		dumpConfig();
 		}catch(Exception e){e.printStackTrace();}
@@ -253,6 +282,56 @@ public class Main extends JavaPlugin implements Listener{
 					Effect ef = new Effect((Player) sender, Particle.END_ROD);
 					animan.playEffect(ef);
 					sender.sendMessage("Trying animation");
+					return true;
+				}
+				if (args[0].equalsIgnoreCase("inv"))
+				{
+					/** Inventory Test */
+					/*
+					LInventory linv = new LInventory(6*9, core.parse("&7"+sender.getName()+"'s &9Vault"));
+					LInventoryItem item = new LInventoryItem();
+					item.item = new Item(Material.BED, "Home");
+					item.runLClick = new Runnable() {
+						
+						@Override
+						public void run() {
+							Bukkit.getServer().dispatchCommand(sender, "clan home");
+							Bukkit.getLogger().info("EXECUTED ON CLICK");
+						}
+					};
+					linv.items.put(5, item);
+					linvs.put("lucemans.test."+sender.getName(), linv);
+					linv.openInventory((Player) sender);
+					sender.sendMessage(core.parse("Opening Inventory..."));
+					return true;
+					*/
+					if (args.length > 2)
+					{
+						String mod1 = args[1];
+						if (mod1.equalsIgnoreCase("open"))
+						{
+							sender.sendMessage(core.parse("This command is still w.i.p."));
+							return true;
+						}
+						if (mod1.equalsIgnoreCase("close"))
+						{
+							String mod2 = args[2];
+							Player p = Bukkit.getPlayer(mod2);
+							if (p != null)
+							{
+								if (p.getOpenInventory() != null)
+								{
+									p.closeInventory();
+								}
+								sender.sendMessage(core.parse("Inventory Closed."));
+								return true;
+							}
+							sender.sendMessage(core.parse("Player not found."));
+							return true;
+						}
+					}
+					((Player)sender).openInventory(inventory);
+					//sender.sendMessage(core.parse("Please use /lucemans inv <open/close> <player>"));
 					return true;
 				}
 				if (args[0].equalsIgnoreCase("skin"))
@@ -445,7 +524,6 @@ public class Main extends JavaPlugin implements Listener{
 								try {
 									f.set(data, o);
 								} catch (IllegalArgumentException | IllegalAccessException e) {
-									// TODO Auto-generated catch block
 									e.printStackTrace();
 								}
 							}
@@ -525,6 +603,9 @@ public class Main extends JavaPlugin implements Listener{
 		for (DelayedTP tp : removeMe)
 			dtps.remove(tp);
 		
+		for (LInventory linv : linvs.values())
+			linv.onTick();
+		
 		// Check player data stuff
 		for (Player p : Bukkit.getOnlinePlayers())
 		{
@@ -586,6 +667,40 @@ public class Main extends JavaPlugin implements Listener{
 	}
 	
 	@EventHandler
+	public void onInventory(InventoryInteractEvent event)
+	{
+		getLogger().info("CLICK!!!!");
+		for (LInventory linv : linvs.values())
+		{
+			if (linv.inv.equals(event.getInventory()))
+			{
+				event.setCancelled(true);
+			}
+		}
+	}
+	
+	@EventHandler
+	public void onInventoryInteract(InventoryClickEvent event)
+	{
+		getLogger().info("Click Registered!");
+		for (LInventory linv : linvs.values())
+		{
+			if (linv.inv.equals(event.getInventory()))
+			{
+				getLogger().info("Click Registered in LucemansCore Inventory!!");
+				event.setCancelled(true);
+				if (event.isShiftClick())
+					return;
+				if (event.isLeftClick())
+					linv.onClick(event.getSlot(), true);
+				if (event.isRightClick())
+					linv.onClick(event.getSlot(), false);
+				event.setCancelled(true);
+			}
+		}
+	}
+	
+	@EventHandler
 	public void onGlobalCMD(PlayerCommandPreprocessEvent event)
 	{
 		if (event.getMessage().equalsIgnoreCase("/pl") || event.getMessage().equalsIgnoreCase("/plugins") || event.getMessage().equalsIgnoreCase("/bukkit:plugins"))
@@ -608,6 +723,15 @@ public class Main extends JavaPlugin implements Listener{
 				}
 				event.getPlayer().sendMessage(core.parse(tot));
 			}
+		}
+		//getLogger().info("Reading " + event.getMessage());
+		if (event.getMessage().startsWith("/lhelp"))
+		{
+			String msg = event.getMessage().replaceFirst("/lhelp ", "");
+			//getLogger().info("Executing " + msg);
+			Player p = event.getPlayer();
+			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), msg);
+			event.setMessage("/help");
 		}
 	}
 }

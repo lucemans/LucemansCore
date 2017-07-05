@@ -10,6 +10,11 @@ import org.bukkit.craftbukkit.v1_11_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.minecraft.server.v1_11_R1.Packet;
 import nl.lucemans.Core.item.Item;
 import nl.lucemans.Core.race.Human;
@@ -27,10 +32,20 @@ import nl.lucemans.animation.effects.Effect;
 public class LucemansCore {
 	
 	public static Main main;
+	public HashMap<String, ChatColor> colors = new HashMap<String, ChatColor>();
+	
+	public LucemansCore()
+	{
+		String[] list = "1 2 3 4 5 6 7 8 9 0 a c b r".split(" ");
+		for (String _str : list)
+		{
+			colors.put(_str, ChatColor.getByChar(_str.charAt(0)));
+		}
+	}
 	
 	public String parse(String text)
 	{
-		text = text.replace("&", "§");
+		text = ChatColor.translateAlternateColorCodes("&".charAt(0), text);
 		return text;
 	}
 	
@@ -50,6 +65,65 @@ public class LucemansCore {
 		text = parse.parse(this, text, true);
 
 		return text;
+	}
+	
+	public ArrayList<String> parse(ArrayList<String> _list)
+	{
+		ArrayList<String> _list2 = new ArrayList<String>();
+		for (String str : _list)
+			_list2.add(parse(str));
+		return _list2;
+	}
+	
+	public TextComponent parse(TextComponent comp)
+	{
+		String text = comp.getText().replaceAll("&l", "§l").replaceAll("&k", "§k");
+		String[] lst = text.split("&");
+		TextComponent total = new TextComponent();
+		for (String str : lst)
+		{			
+			boolean obfus = false;
+			boolean bold = false;
+			ChatColor ch = ChatColor.WHITE;
+			for (String _str : colors.keySet())
+			{
+				//main.getLogger().info("Checking if \""+str+"\" starts with " + _str);
+				if (str.startsWith(_str))
+				{
+					main.getLogger().info("YES");
+					str = str.replaceFirst(_str, "");
+					ch = colors.get(_str);
+					break;
+				}
+				else
+				{
+					main.getLogger().info("NO");
+				}
+			}
+			if (str.startsWith("§l"))
+			{
+				bold = true;
+				str = str.replaceFirst("§l", "");
+			}
+			if (str.startsWith("§k"))
+			{
+				obfus = true;
+				str = str.replaceFirst("§k", "");
+			}
+			TextComponent _comp = new TextComponent(str);
+			_comp.setColor(ch);
+			_comp.setObfuscated(obfus);
+			_comp.setBold(bold);
+			total.addExtra(_comp);
+		}
+		total.setClickEvent(comp.getClickEvent());
+		total.setHoverEvent(comp.getHoverEvent());
+		return total;
+	}
+	
+	public boolean willFormat(String str)
+	{
+		return (!str.equalsIgnoreCase(parse(str)));
 	}
 	
 	public UserData getUser(String name)
@@ -155,6 +229,25 @@ public class LucemansCore {
 		Integer days = (int) (world.getFullTime()/24000);
 		Integer phase = days%8;
 		return phase;
+	}
+	
+	// TEXT //
+	public void sendQuest(Player p, String quest, String ans1, String act_ans1, String ans2, String act_ans2)
+	{
+		TextComponent message = parse(new TextComponent("  " + quest + "\n  "));
+		message.addExtra(parse(makeClickable(ans1, new ClickEvent(ClickEvent.Action.RUN_COMMAND, act_ans1), new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Hover Text #1").create()))));
+		message.addExtra(parse(makeClickable(ans2, new ClickEvent(ClickEvent.Action.RUN_COMMAND, act_ans2), new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Hover Text #2").create()))));
+		p.sendMessage(" ");
+		p.spigot().sendMessage(message);
+		p.sendMessage(" ");
+	}
+	
+	public TextComponent makeClickable(String text, ClickEvent ce, HoverEvent he)
+	{
+		TextComponent comp = new TextComponent(text);
+		comp.setClickEvent(ce);
+		comp.setHoverEvent(he);
+		return comp;
 	}
 	
 	// SKINS //

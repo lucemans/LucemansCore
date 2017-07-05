@@ -56,7 +56,9 @@ public class UserData {
 	
 	public String getVaultPrefix(Player player)
 	{
-		return LucemansCore.main.chat.getPlayerPrefix(player);
+		if (LucemansCore.main.chat != null)
+			return LucemansCore.main.chat.getPlayerPrefix(player);
+		return "";
 	}
 	
 	public String getGroupPrefix(Player p)
@@ -66,12 +68,16 @@ public class UserData {
 	
 	public String getClanPrefix()
 	{
-		return LucemansCore.main.clanman.getUser(user).getPrimaryClan().prefix; //TODO: CHANGE TO PREFIX OF CLAN
+		if (LucemansCore.main.clanman != null)
+			return LucemansCore.main.clanman.getUser(user).getPrimaryClan().prefix; //TODO: CHANGE TO PREFIX OF CLAN
+		return "";
 	}
 	
 	public String getClanRolePrefix()
 	{
-		return LucemansCore.main.clanman.getUser(user).getPrimaryClanPrefix();
+		if (LucemansCore.main.clanman != null)
+			return LucemansCore.main.clanman.getUser(user).getPrimaryClanPrefix();
+		return "";
 	}
 	
 	public ArrayList<Role> getRolePrior()
