@@ -234,18 +234,38 @@ public class LucemansCore {
 	// VERSIONS //
 	public boolean isProperVersion(String minimum)
 	{
-		return filterVersion(minimum) >= filterVersion(main.version);
+		Integer iminimum = filterVersion(minimum);
+		Integer icurrent = filterVersion(main.version);
+		main.getLogger().info("iminimum: " + iminimum + " icurrent: " + icurrent);
+		return icurrent >= iminimum;
 	}
 	
 	public Integer filterVersion(String vers)
 	{
 		try{
-			String[] empt = vers.split(".");
+			ArrayList<String> empt = new ArrayList<String>();
+			Integer k = 0;
+			String current = "";
+			while (k < vers.length())
+			{
+				if (vers.substring(k, k+1).equalsIgnoreCase("."))
+				{
+					empt.add(current);
+					current = "";
+					k++;
+					continue;
+				}
+				current += vers.substring(k, k+1);
+				k++;
+			}
+			empt.add(current);
 			Integer i = 0;
+			main.getLogger().info("SPLITTING " + vers + " at the . " + vers.split("."));
 			for (String em : empt)
 			{
 				i *= 10;
 				i += Integer.parseInt(em);
+				main.getLogger().info("FOUND " + Integer.parseInt(em) + " from " + em + " current " + i);
 			}
 			return i;
 		}catch(Exception e)

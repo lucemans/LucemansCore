@@ -5,6 +5,14 @@
   <version>0.0.1-SNAPSHOT</version>
   <build>
     <sourceDirectory>src</sourceDirectory>
+   	<resources>
+		<resource>
+			<directory>src/</directory>
+			<includes>
+				<include>plugin.yml</include>
+			</includes>
+		</resource>
+	</resources>
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -47,8 +55,8 @@
   </build>
   <repositories>
     <repository>
-      <id>spigot-repo</id>
-      <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
+        <id>spigot-repo</id>
+        <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
     </repository>
     <repository>
       <id>bstats-repo</id>
@@ -60,18 +68,12 @@
     </repository>
   </repositories>
   <dependencies>
-    <!-- Spigot as an example -->
-    <dependency>
-      <groupId>org.spigotmc</groupId>
-      <artifactId>spigot-api</artifactId>
-      <version>LATEST</version>
-    </dependency>
-    <!--Bukkit API-->
-  <dependency>
-   <groupId>org.bukkit</groupId>
-   <artifactId>bukkit</artifactId>
-   <version>LATEST</version>
-  </dependency>
+<dependency>
+    <groupId>org.spigotmc</groupId>
+    <artifactId>spigot</artifactId>
+    <version>1.10.2-R0.1-SNAPSHOT</version>
+    <scope>provided</scope>
+</dependency>
     <!-- bStats -->
     <dependency>
       <groupId>org.bstats</groupId>
