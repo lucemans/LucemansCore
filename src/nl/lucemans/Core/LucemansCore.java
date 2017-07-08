@@ -231,6 +231,30 @@ public class LucemansCore {
 		return phase;
 	}
 	
+	// VERSIONS //
+	public boolean isProperVersion(String minimum)
+	{
+		return filterVersion(minimum) >= filterVersion(main.version);
+	}
+	
+	public Integer filterVersion(String vers)
+	{
+		try{
+			String[] empt = vers.split(".");
+			Integer i = 0;
+			for (String em : empt)
+			{
+				i *= 10;
+				i += Integer.parseInt(em);
+			}
+			return i;
+		}catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
 	// TEXT //
 	public void sendQuest(Player p, String quest, String ans1, String act_ans1, String ans2, String act_ans2)
 	{

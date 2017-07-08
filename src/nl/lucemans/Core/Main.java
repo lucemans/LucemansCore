@@ -4,13 +4,11 @@ import java.lang.reflect.Field;
 import java.security.acl.Permission;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Set;
 
-import org.apache.logging.log4j.Level;
+import org.bstats.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Particle;
-import org.bukkit.Server;
 import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -22,12 +20,8 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryInteractEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.permissions.PermissionAttachment;
-import org.bukkit.permissions.PermissionAttachmentInfo;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -35,8 +29,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
 import nl.lucemans.Core.inv.LInventory;
-import nl.lucemans.Core.inv.LInventoryItem;
-import nl.lucemans.Core.item.Item;
 import nl.lucemans.Core.item.ItemManager;
 import nl.lucemans.Core.race.Human;
 import nl.lucemans.Core.race.Race;
@@ -47,6 +39,7 @@ import nl.lucemans.Core.skin.SkinChange;
 import nl.lucemans.Core.skin.SkinManipulator;
 import nl.lucemans.Core.tp.DelayedTP;
 import nl.lucemans.Core.type.LucemansListener;
+import nl.lucemans.Core.update.Updater;
 import nl.lucemans.animation.NovaAnimations;
 import nl.lucemans.animation.effects.Effect;
 import nl.lucemans.clans.NovaClans;
@@ -79,6 +72,8 @@ public class Main extends JavaPlugin implements Listener{
 	public NovaAnimations animan;
 	public NovaClans clanman;
 	
+	public Updater updater;
+	
 	public Economy econ = null;
     public Permission perms = null;
     public Chat chat = null;
@@ -88,6 +83,8 @@ public class Main extends JavaPlugin implements Listener{
     
     /*** FUN ***/
     public Inventory inventory;
+    
+    public String version = getDescription().getVersion();
 
 	@Override
 	public void onEnable() {
@@ -115,9 +112,21 @@ public class Main extends JavaPlugin implements Listener{
 		core = (LucemansCore) Bukkit.getServicesManager().getRegistrations(this).get(0).getProvider();
 		getLogger().info("Connection Established.");
 		
+		Metrics metrics = new Metrics(this);
+		
 		// Resetup link
 		//core.setMain(this);
 		//core.main = this;
+		
+		updater = new Updater();
+		updater.checkUpdate(getDescription().getVersion());
+		if (updater.getLatestVersion() != null)
+		{
+			getLogger().severe("Latsest Version " + updater.getLatestVersion());
+			getLogger().warning("Updating to newer version of LucemansCore.");
+			getLogger().severe(updater.getRawVersion());
+		}
+		//getLogger().severe(" " + getDescription().getVersion() + " -> " + updater.toReadable(getDescription().getVersion()));
 		
 		getLogger().info(core.parse("Defaults Files"));
 		setDefaults();
@@ -171,6 +180,24 @@ public class Main extends JavaPlugin implements Listener{
 		{
 			p.sendMessage(core.parse("&7[&eLucemansCore&7] &7This server uses LucemansCore."));
 		}
+		
+		metrics.addCustomChart(new Metrics.AdvancedPie("races") {
+			
+			@Override
+			public HashMap<String, Integer> getValues(HashMap<String, Integer> arg0) {
+				HashMap<String, Integer> count = new HashMap<String, Integer>();
+				for (UserData data : userDatas)
+				{
+					if (data.raceStr != null)
+					{
+						if (!count.containsKey(data.raceStr))
+							count.put(data.raceStr, 0);
+						count.put(data.raceStr, count.get(data.raceStr) + 1);
+					}
+				}
+				return count;
+			}
+		});
 	}
 	
 	@Override
@@ -207,7 +234,7 @@ public class Main extends JavaPlugin implements Listener{
 	
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		if (label.equalsIgnoreCase("lbook"))
+		if (label.equalsIgnoreCase("lbook") || label.equalsIgnoreCase("lucemanscore:lbook"))
 		{
 			if (((Player)sender).getItemInHand().getType().equals(Material.BOOK_AND_QUILL))
 			{
@@ -222,7 +249,7 @@ public class Main extends JavaPlugin implements Listener{
 			sender.sendMessage(LucemansCore.getINSTANCE().parse("%prefix% Something went wrong."));
 			return true;
 		}
-		if (label.equalsIgnoreCase("rename"))
+		if (label.equalsIgnoreCase("rename") || label.equalsIgnoreCase("lucemanscore:rename"))
 		{
 			if (sender.hasPermission("lucemanscore.rename"))
 			{
@@ -725,9 +752,9 @@ public class Main extends JavaPlugin implements Listener{
 			}
 		}
 		//getLogger().info("Reading " + event.getMessage());
-		if (event.getMessage().startsWith("/lhelp"))
+		if (event.getMessage().startsWith("/lhelp") || event.getMessage().startsWith("/ihelp"))
 		{
-			String msg = event.getMessage().replaceFirst("/lhelp ", "");
+			String msg = event.getMessage().replaceFirst("/lhelp ", "").replaceFirst("/ihelp", "");
 			//getLogger().info("Executing " + msg);
 			Player p = event.getPlayer();
 			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), msg);
