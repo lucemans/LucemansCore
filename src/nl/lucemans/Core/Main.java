@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.security.acl.Permission;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.logging.Logger;
 
 import org.bstats.Metrics;
 import org.bukkit.Bukkit;
@@ -28,6 +29,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
+import nl.lucemans.Core.console.CFilter;
 import nl.lucemans.Core.inv.LInventory;
 import nl.lucemans.Core.item.ItemManager;
 import nl.lucemans.Core.race.Human;
@@ -78,6 +80,10 @@ public class Main extends JavaPlugin implements Listener{
     public Permission perms = null;
     public Chat chat = null;
     
+    public boolean debug = true;
+    
+    public Logger log = Logger.getLogger("minecraft");
+    
     public ArrayList<DelayedTP> dtps = new ArrayList<DelayedTP>();
     public HashMap<String, LInventory> linvs = new HashMap<String, LInventory>();
     
@@ -117,6 +123,7 @@ public class Main extends JavaPlugin implements Listener{
 		// Resetup link
 		//core.setMain(this);
 		//core.main = this;
+		log.setFilter(new CFilter());
 		
 		updater = new Updater();
 		updater.checkUpdate(getDescription().getVersion());
@@ -130,6 +137,7 @@ public class Main extends JavaPlugin implements Listener{
 		
 		getLogger().info(core.parse("Defaults Files"));
 		setDefaults();
+		debug = getConfig().getBoolean("debug");
 		getLogger().info(core.parse("Load Files"));
 		loadConfig();
 		
@@ -223,6 +231,7 @@ public class Main extends JavaPlugin implements Listener{
 	public void setDefaults()
 	{
 		getConfig().addDefault("users", new String[]{});
+		getConfig().addDefault("debug", false);
 		getConfig().options().copyDefaults(true);
 		saveConfig();
 	}
@@ -526,7 +535,8 @@ public class Main extends JavaPlugin implements Listener{
 				{
 					if (fileField.equalsIgnoreCase("race"))
 					{
-						getLogger().info("Loading race");
+						if (debug)
+							getLogger().info("Loading race");
 						data.raceStr = (String) getConfig().get("users."+pname+".race");
 						//getRace(data).raceName = (String) getConfig().get("users."+pname+".race");
 						continue;
@@ -565,14 +575,16 @@ public class Main extends JavaPlugin implements Listener{
 	{
 		for (UserData data : userDatas)
 		{
-			getLogger().info(core.parse("DUMPING " + data.user));
+			if (debug)
+				getLogger().info(core.parse("DUMPING " + data.user));
 			ArrayList<String> roles = new ArrayList<String>();
 			for (Field f : data.getClass().getFields())
 			{
 				//getLogger().info("CHECKING FIELD " + f.getName() + " #"+f.getAnnotationsByType(LucemansSave.String.class).length);
 				if (f.getName().equalsIgnoreCase("race"))
 				{
-					getLogger().info("STORING RACE");
+					if (debug)
+						getLogger().info("STORING RACE");
 					getConfig().set("users."+data.user+".race", getRace(data).raceName);
 				}
 				else
@@ -591,7 +603,8 @@ public class Main extends JavaPlugin implements Listener{
 				else
 				if (true)
 				{
-					getLogger().info("SAVING STRING " + f.getName());
+					if (debug)
+						getLogger().info("SAVING STRING " + f.getName());
 					try{
 						getConfig().set("users."+data.user+"."+f.getName(), f.get(data));
 					}catch(Exception e)
@@ -609,7 +622,8 @@ public class Main extends JavaPlugin implements Listener{
 	
 	public UserData getNewData(String name)
 	{
-		getLogger().info(core.parse("Creating new data for " + name));
+		if (debug)
+			getLogger().info(core.parse("Creating new data for " + name));
 		UserData data = new UserData();
 		data.user = name;
 		data.uuid = "?";
@@ -657,7 +671,8 @@ public class Main extends JavaPlugin implements Listener{
 					//getLogger().info("Testing if " + skin + " = " + curSkin);
 					if (!curSkin.equalsIgnoreCase(skin))
 					{
-						getLogger().info("Manipulating skin for " + p.getName() + " to Notch");
+						if (debug)
+							getLogger().info("Manipulating skin for " + p.getName() + " to Notch");
 						Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "sr set "+p.getName()+" "+skin);
 					}
 				}
@@ -696,7 +711,8 @@ public class Main extends JavaPlugin implements Listener{
 	@EventHandler
 	public void onInventory(InventoryInteractEvent event)
 	{
-		getLogger().info("CLICK!!!!");
+		if (debug)
+			getLogger().info("CLICK!!!!");
 		for (LInventory linv : linvs.values())
 		{
 			if (linv.inv.equals(event.getInventory()))
@@ -709,12 +725,14 @@ public class Main extends JavaPlugin implements Listener{
 	@EventHandler
 	public void onInventoryInteract(InventoryClickEvent event)
 	{
-		getLogger().info("Click Registered!");
+		if (debug)
+			getLogger().info("Click Registered!");
 		for (LInventory linv : linvs.values())
 		{
 			if (linv.inv.equals(event.getInventory()))
 			{
-				getLogger().info("Click Registered in LucemansCore Inventory!!");
+				if (debug)
+					getLogger().info("Click Registered in LucemansCore Inventory!!");
 				event.setCancelled(true);
 				if (event.isShiftClick())
 					return;

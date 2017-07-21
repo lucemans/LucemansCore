@@ -19,6 +19,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 
 import net.minecraft.server.v1_10_R1.EntityHuman;
+import nl.lucemans.Core.LucemansCore;
 import nl.lucemans.Core.item.Item;
 
 public class AnvilGui implements Listener {
@@ -37,7 +38,8 @@ public class AnvilGui implements Listener {
 		inv = Bukkit.createInventory(null, InventoryType.ANVIL);
 		inv.setItem(Slot.INPUT_LEFT, input1.getItem());
 		
-		Bukkit.getLogger().info("Registering ANVILGUI events");
+		if (LucemansCore.getINSTANCE().main.debug)
+			Bukkit.getLogger().info("Registering ANVILGUI events");
 		Bukkit.getPluginManager().registerEvents(this, pl);
 		
 		p.openInventory(inv);
@@ -59,7 +61,8 @@ public class AnvilGui implements Listener {
                 if(clicked == null || clicked.getType() == Material.AIR)
                 {
                 	e.setCancelled(true);
-                	Bukkit.getLogger().info("Clicked = null");
+            		if (LucemansCore.getINSTANCE().main.debug)
+            			Bukkit.getLogger().info("Clicked = null");
                 	return;
                 }
                 final String ret = biFunction.apply(clicker, clicked.hasItemMeta() ? clicked.getItemMeta().getDisplayName() : clicked.getType().toString());

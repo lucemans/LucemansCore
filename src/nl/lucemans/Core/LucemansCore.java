@@ -90,14 +90,16 @@ public class LucemansCore {
 				//main.getLogger().info("Checking if \""+str+"\" starts with " + _str);
 				if (str.startsWith(_str))
 				{
-					main.getLogger().info("YES");
+					if (main.debug)
+						main.getLogger().info("YES");
 					str = str.replaceFirst(_str, "");
 					ch = colors.get(_str);
 					break;
 				}
 				else
 				{
-					main.getLogger().info("NO");
+					if (main.debug)
+						main.getLogger().info("NO");
 				}
 			}
 			if (str.startsWith("§l"))
@@ -236,7 +238,8 @@ public class LucemansCore {
 	{
 		Integer iminimum = filterVersion(minimum);
 		Integer icurrent = filterVersion(main.version);
-		main.getLogger().info("iminimum: " + iminimum + " icurrent: " + icurrent);
+		if (main.debug)
+			main.getLogger().info("iminimum: " + iminimum + " icurrent: " + icurrent);
 		return icurrent >= iminimum;
 	}
 	
@@ -260,12 +263,14 @@ public class LucemansCore {
 			}
 			empt.add(current);
 			Integer i = 0;
-			main.getLogger().info("SPLITTING " + vers + " at the . " + vers.split("."));
+			if (main.debug)
+				main.getLogger().info("SPLITTING " + vers + " at the . " + vers.split("."));
 			for (String em : empt)
 			{
 				i *= 10;
 				i += Integer.parseInt(em);
-				main.getLogger().info("FOUND " + Integer.parseInt(em) + " from " + em + " current " + i);
+				if (main.debug)
+					main.getLogger().info("FOUND " + Integer.parseInt(em) + " from " + em + " current " + i);
 			}
 			return i;
 		}catch(Exception e)
@@ -367,19 +372,22 @@ public class LucemansCore {
 	public void registerListener(LucemansListener c)
 	{
 		main.listeners.add(c);
-		main.getLogger().info(parse("Registered Listener "));
+		if (main.debug)
+			main.getLogger().info(parse("Registered Listener "));
 	}
 	
 	public void registerRace(Race r)
 	{
 		main.races.add(r);
-		main.getLogger().info(r.getClass().getName() + " has been registered as a Race.");
+		if (main.debug)
+			main.getLogger().info(r.getClass().getName() + " has been registered as a Race.");
 	}
 	
 	public void registerRole(Role r)
 	{
 		main.roles.add(r);
-		main.getLogger().info(r.name + " has been registered as a Role");
+		if (main.debug)
+			main.getLogger().info(r.name + " has been registered as a Role");
 	}
 	
 	public void registerItem(String loc, Item item)

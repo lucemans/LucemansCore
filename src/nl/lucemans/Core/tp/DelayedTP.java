@@ -31,7 +31,9 @@ public class DelayedTP {
 	
 	public DelayedTP onTick()
 	{
-		Bukkit.getLogger().info("TP TICK");
+		LucemansCore.getINSTANCE();
+		if (LucemansCore.main.debug)
+			Bukkit.getLogger().info("TP TICK");
 		if (p == null)
 		{
 			return this;

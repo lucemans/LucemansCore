@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import org.bukkit.Bukkit;
 
+import nl.lucemans.Core.LucemansCore;
 import skinsrestorer.shared.api.SkinsRestorerAPI;
 
 public class SkinManipulator {
@@ -41,7 +42,9 @@ public class SkinManipulator {
 		}
 		curList.add(skin);
 		skins.put(user, curList);
-		Bukkit.getLogger().info("ADDED A SKIN for " + user);
+		LucemansCore.getINSTANCE();
+		if (LucemansCore.main.debug)
+			Bukkit.getLogger().info("ADDED A SKIN for " + user);
 	}
 	
 	public void removeSkin(String user, String reason)
@@ -55,10 +58,14 @@ public class SkinManipulator {
 		for (SkinChange sc : removeFrom)
 		{
 			curList.remove(sc);
-			Bukkit.getLogger().info("Removed " + sc.reason);
+			LucemansCore.getINSTANCE();
+			if (LucemansCore.main.debug)
+				Bukkit.getLogger().info("Removed " + sc.reason);
 		}
 		skins.put(user, curList);
-		Bukkit.getLogger().info("REMOVED A SKIN for " + user);
+		LucemansCore.getINSTANCE();
+		if (LucemansCore.main.debug)
+			Bukkit.getLogger().info("REMOVED A SKIN for " + user);
 	}
 	
 	public String getPrevSkin(String user)
