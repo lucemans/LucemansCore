@@ -48,4 +48,16 @@ public class LInventoryItem {
 		if (runRClick != null)
 			runRClick.run();
 	}
+	
+	public LInventoryItem setLClick(Runnable run)
+	{
+		runLClick = run;
+		return this;
+	}
+	
+	public LInventoryItem setRClick(Runnable run)
+	{
+		runRClick = run;
+		return this;
+	}
 }

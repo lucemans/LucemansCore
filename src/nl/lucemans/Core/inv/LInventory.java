@@ -6,6 +6,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
+import nl.lucemans.Core.LucemansCore;
+
 public class LInventory {
 
 	public Inventory inv;
@@ -13,14 +15,15 @@ public class LInventory {
 	
 	public LInventory(Integer size, String name)
 	{
-		inv = Bukkit.getServer().createInventory(null, size, name);
+		inv = Bukkit.getServer().createInventory(null, size, LucemansCore.getINSTANCE().parse(name));
 	}
 	
 	public void onTick()
 	{
 		inv.clear();
 		for (Integer slot : items.keySet())
-			inv.setItem(slot, items.get(slot).getItem());
+			if (slot < inv.getSize())
+				inv.setItem(slot, items.get(slot).getItem());
 	}
 	
 	public void openInventory(Player p)

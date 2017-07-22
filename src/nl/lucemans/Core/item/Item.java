@@ -57,10 +57,28 @@ public class Item {
 		if (this.meta != null)
 			meta = this.meta;
 		
-		meta.setDisplayName(LucemansCore.getINSTANCE().parse(name));
+		meta.setDisplayName(LucemansCore.getINSTANCE().parse("&r"+name));
 		meta.setLore(lore);
 		
 		item.setItemMeta(meta);
 		return item;
+	}
+	
+	public Item setLore(ArrayList<String> lore)
+	{
+		this.lore = lore;
+		return this;
+	}
+	
+	public Item setDamage(byte damage)
+	{
+		this.damage = damage;
+		return this;
+	}
+	
+	public Item setAmount(Integer amount)
+	{
+		this.amount = amount;
+		return this;
 	}
 }
