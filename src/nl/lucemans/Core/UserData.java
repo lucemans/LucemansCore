@@ -57,13 +57,13 @@ public class UserData {
 	public String getVaultPrefix(Player player)
 	{
 		if (LucemansCore.main.chat != null)
-			return LucemansCore.main.chat.getPlayerPrefix(player);
+			return LucemansCore.main.chat.getPlayerPrefix(null, player);
 		return "";
 	}
 	
 	public String getGroupPrefix(Player p)
 	{
-		return LucemansCore.main.chat.getGroupPrefix(p.getWorld(), LucemansCore.main.chat.getPrimaryGroup(p));
+		return LucemansCore.main.chat.getGroupPrefix((String) null, LucemansCore.main.chat.getPrimaryGroup(p));
 	}
 	
 	public String getClanPrefix()

@@ -1,12 +1,14 @@
 package nl.lucemans.Core.item;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.material.MaterialData;
 
 import nl.lucemans.Core.LucemansCore;
 
@@ -19,6 +21,8 @@ public class Item {
 	public Recipe r;
 	public ItemMeta meta;
 	public byte damage = 0;
+	public HashMap<Enchantment, Integer> enchants = new HashMap<Enchantment, Integer>();
+	public ArrayList<ItemFlag> flags = new ArrayList<ItemFlag>();
 	
 	public Item(Material mat, String _name, String[] _lore, Integer _amount)
 	{
@@ -59,8 +63,13 @@ public class Item {
 		
 		meta.setDisplayName(LucemansCore.getINSTANCE().parse("&r"+name));
 		meta.setLore(lore);
+		for (ItemFlag flag : flags)
+			meta.addItemFlags(flag);
 		
 		item.setItemMeta(meta);
+		for (Enchantment ench : enchants.keySet())
+			item.addUnsafeEnchantment(ench, enchants.get(ench));
+		
 		return item;
 	}
 	
@@ -79,6 +88,18 @@ public class Item {
 	public Item setAmount(Integer amount)
 	{
 		this.amount = amount;
+		return this;
+	}
+	
+	public Item putEnchant(Enchantment ench, Integer level)
+	{
+		this.enchants.put(ench, level);
+		return this;
+	}
+	
+	public Item addFlag(ItemFlag flag)
+	{
+		this.flags.add(flag);
 		return this;
 	}
 }

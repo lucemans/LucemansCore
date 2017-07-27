@@ -57,6 +57,7 @@ public class LucemansCore {
 		parse.placeholders.put("%f-prefix%", getUser(p.getName()).getFullPrefix());
 		parse.placeholders.put("%r-prefix%", getUser(p.getName()).getRolePrefix());
 		parse.placeholders.put("%v-prefix%", getUser(p.getName()).getVaultPrefix(p));
+		parse.placeholders.put("%g-prefix%", getUser(p.getName()).getGroupPrefix(p));
 		parse.placeholders.put("%c-clan%", getUser(p.getName()).getClanPrefix());
 		parse.placeholders.put("%cr-prefix%", getUser(p.getName()).getClanRolePrefix());
 		parse.placeholders.put("%race%", getUser(p.getName()).raceStr);
