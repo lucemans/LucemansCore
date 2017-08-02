@@ -1,6 +1,6 @@
 name: LucemansCore
 main: nl.lucemans.Core.Main
-version: 1.0.6
+version: 1.0.7
 author: MrDisk (Lucemans)
 softdepends: [SkinsRestorer, Vault]
 commands:
